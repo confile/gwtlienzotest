@@ -1,8 +1,13 @@
 gwtlienzotest
 =============
 
-A comparison between Lienzo 1.2.4 and KineticJS 5.10
+A comparison between [Lienzo 1.2.4][1] and [KineticJS 5.10][2]
 
+
+
+
+  [1]: https://github.com/emitrom/lienzo
+  [2]: https://github.com/ericdrowell/KineticJS
 
 ###Load image into canvas
 
