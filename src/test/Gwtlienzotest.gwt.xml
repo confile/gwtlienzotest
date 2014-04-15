@@ -13,6 +13,9 @@
 	
 	<inherits name='com.google.common.base.Base' />
 	
+		<!-- MGWT -->
+	<inherits name="com.googlecode.mgwt.MGWT"/>
+	
 	<!-- lienzo -->
 	<!-- https://github.com/emitrom/lienzo -->
 	<inherits name='com.emitrom.lienzo.Lienzo' />
@@ -27,7 +30,14 @@
   <source path='client'/>
 
 	
+	<set-property name="mgwt.os" value="iphone" />  
 	<set-property name="user.agent" value="safari" />
 
   <add-linker name="xsiframe"/>
+  
+  	<set-configuration-property name="mgwt.superdevmode" value="on" />
+	
+	<set-configuration-property name="devModeUrlWhitelistRegexp" value="http://(http-server|testgrails.dyndns.org|localhost|192\.168\.178\.26)(:\d+)?/.*" />
+	<set-configuration-property name="mgwt.superdevmode_host" value="http://192.168.178.26:9876" />
+  
 </module>

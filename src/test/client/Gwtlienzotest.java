@@ -9,6 +9,18 @@ import org.michaelgorski.kinetic.KRectangle;
 import org.michaelgorski.kinetic.KStage;
 import org.michaelgorski.kinetic.Kinetic;
 
+import com.emitrom.lienzo.client.core.event.NodeDragEndEvent;
+import com.emitrom.lienzo.client.core.event.NodeDragEndHandler;
+import com.emitrom.lienzo.client.core.event.NodeDragMoveEvent;
+import com.emitrom.lienzo.client.core.event.NodeDragMoveHandler;
+import com.emitrom.lienzo.client.core.event.NodeGestureChangeEvent;
+import com.emitrom.lienzo.client.core.event.NodeGestureChangeHandler;
+import com.emitrom.lienzo.client.core.event.NodeGestureEndEvent;
+import com.emitrom.lienzo.client.core.event.NodeGestureEndHandler;
+import com.emitrom.lienzo.client.core.event.NodeGestureStartEvent;
+import com.emitrom.lienzo.client.core.event.NodeGestureStartHandler;
+import com.emitrom.lienzo.client.core.event.NodeTouchStartEvent;
+import com.emitrom.lienzo.client.core.event.NodeTouchStartHandler;
 import com.emitrom.lienzo.client.core.image.PictureLoadedHandler;
 import com.emitrom.lienzo.client.core.shape.Layer;
 import com.emitrom.lienzo.client.core.shape.Picture;
@@ -26,6 +38,10 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.googlecode.mgwt.ui.client.MGWT;
+import com.googlecode.mgwt.ui.client.MGWTSettings;
+import com.googlecode.mgwt.ui.client.MGWTSettings.ViewPort;
+import com.googlecode.mgwt.ui.client.util.SuperDevModeUtil;
 
 public class Gwtlienzotest implements EntryPoint {
 	
@@ -40,14 +56,23 @@ public class Gwtlienzotest implements EntryPoint {
 	
 	public void onModuleLoad() {
 		
+		SuperDevModeUtil.showDevMode();
+		ViewPort viewPort = new MGWTSettings.ViewPort();
+		MGWTSettings settings = new MGWTSettings();
+		settings.setViewPort(viewPort);
+		settings.setFullscreen(true);
+		settings.setPreventScrolling(true);
+		MGWT.applySettings(settings);
+		
+		
 		final FileUpload fileUpload = new FileUpload();
 		FlowPanel canvasPanel = new FlowPanel();
 		RootPanel.get().add(fileUpload);
 		RootPanel.get().add(canvasPanel);
 				
 		// set stage
-		setLienzoStage(canvasPanel, Window.getClientWidth(), Window.getClientHeight()- 50);
-//		setKineticStage(canvasPanel, Window.getClientWidth(), Window.getClientHeight()- 50);
+//		setLienzoStage(canvasPanel, Window.getClientWidth(), Window.getClientHeight()- 50);
+		setKineticStage(canvasPanel, Window.getClientWidth(), Window.getClientHeight()- 50);
 		
 		final Image image = new Image();
 		
@@ -63,8 +88,8 @@ public class Gwtlienzotest implements EntryPoint {
 					@Override
 					public void onSuccess(String imageUrl) {
 						
-						setLienzoImage(imageUrl);
-//						setKineticImage(imageUrl);
+//						setLienzoImage(imageUrl);
+						setKineticImage(imageUrl);
 						
 					}
 					
@@ -93,18 +118,78 @@ public class Gwtlienzotest implements EntryPoint {
 	
 	
 	private void setLienzoImage(String imageUrl) {
+		
 		Picture backgroundImage = new Picture(imageUrl, true);
 		backgroundImage.onLoad(new PictureLoadedHandler() {
 			
 			@Override
 			public void onPictureLoaded(Picture picture) {
+				picture.setDraggable(true);
+				
 				GWT.log("image loaded");
 				
 				layer.add(picture);
 				layer.draw();
 				stopTimer();
+				
 			}
 		});
+
+		backgroundImage.addNodeTouchStartHandler(new NodeTouchStartHandler() {
+			
+			@Override
+			public void onNodeTouchStart(NodeTouchStartEvent event) {
+				GWT.log("+++addNodeTouchStartHandler");
+				
+			}
+		});
+		
+		backgroundImage.addNodeGestureStartHandler(new NodeGestureStartHandler() {
+			
+			@Override
+			public void onNodeGestureStart(NodeGestureStartEvent event) {
+				GWT.log("+++addNodeGestureStartHandler");
+				
+			}
+		});
+		
+		
+		backgroundImage.addNodeGestureChangeHandler(new NodeGestureChangeHandler() {
+			
+			@Override
+			public void onNodeGestureChange(NodeGestureChangeEvent event) {
+				GWT.log("+++addNodeGestureChangeHandler");
+			}
+		});
+		
+		backgroundImage.addNodeGestureEndHandler(new NodeGestureEndHandler() {
+			
+			@Override
+			public void onNodeGestureEnd(NodeGestureEndEvent event) {
+				GWT.log("addNodeGestureEndHandler");
+			}
+		});
+		
+		
+		backgroundImage.addNodeDragMoveHandler(new NodeDragMoveHandler() {
+			
+			@Override
+			public void onNodeDragMove(NodeDragMoveEvent event) {
+				GWT.log("picture.addNodeDragMoveHandler");
+			}
+		});
+		
+		backgroundImage.addNodeDragEndHandler(new NodeDragEndHandler() {
+			
+			@Override
+			public void onNodeDragEnd(NodeDragEndEvent event) {
+				GWT.log("picture.addNodeDragEndHandler");
+				
+			}
+		});
+		
+	
+	
 	}
 	
 	
@@ -130,6 +215,7 @@ public class Gwtlienzotest implements EntryPoint {
 
 			@Override
 			public void onSuccess(KImage kimage) {
+				kLayer.setDraggable(true);
 				kLayer.add(kimage);
 				kLayer.draw();
 				stopTimer();
@@ -156,6 +242,7 @@ public class Gwtlienzotest implements EntryPoint {
 		stopwatch.stop();
 		long time = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 		GWT.log("Stop timer: "+time+" ms");
+		Window.alert("Stop timer: "+time+" ms");
 	}
 	
 	
@@ -167,17 +254,37 @@ public class Gwtlienzotest implements EntryPoint {
 			return
 	
 		var myFile = files[0];
-		var _URL = $wnd.URL || $wnd.webkitURL;
 	
-		var callbackDone = $entry(function(file) {	
-			callback.@com.google.gwt.core.client.Callback::onSuccess(Ljava/lang/Object;)(file);
+		var createFileReader = $entry(function() {
+			return new FileReader();
 		});
+		var reader = createFileReader();
+
+		var createMegaPixImage = $entry(function(file) {
+			return new $wnd.MegaPixImage(file);
+		});
+		
+		var mpImg = createMegaPixImage(myFile);
+		
+		var _URL = $wnd.URL || $wnd.webkitURL;
 		
 		image.onload = function() {
 			callbackDone(image.src);
 		};		
-	
-		image.src = _URL.createObjectURL(myFile);
+					
+			
+		var callbackDone = $entry(function(file) {	
+			callback.@com.google.gwt.core.client.Callback::onSuccess(Ljava/lang/Object;)(file);
+		});
+
+		
+		reader.onload = function(event) {
+			var file = reader.result
+			
+			mpImg.render(image, { maxWidth: 2000, maxHeight: 2000, quality: 1.0 });
+
+		}	
+		reader.readAsBinaryString(myFile);
 	
 	}-*/;	
 	
